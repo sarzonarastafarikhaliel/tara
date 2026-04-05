@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TARA — Philippine Travel Spot Recommender</title>
+  <meta name="description" content="Find the best tourist spots in the Philippines based on your region, budget, and activity type." />
+
+  <!-- Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <!-- App -->
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+  <!-- ── Nav ─────────────────────────────── -->
+  <nav class="navbar" id="navbar" role="navigation" aria-label="Main navigation">
+    <div class="nav-inner">
+      <a class="navbar-brand" href="#hero" aria-label="TARA home">
+        <span class="brand-icon" aria-hidden="true">🗺️</span>
+        <span class="brand-name">TARA</span>
+        <span class="brand-sep" aria-hidden="true">/</span>
+        <span class="brand-sub">PH Travel Guide</span>
+      </a>
+      <div class="navbar-actions">
+        <a href="#discover" class="nav-link">Search</a>
+        <a href="#results-section" class="nav-link" id="navMapLink" style="display:none">Results</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Hero ────────────────────────────── -->
+  <section class="hero" id="hero">
+    <div class="container hero-inner">
+      <div class="hero-text">
+        <h1 class="hero-title">Discover the best of the Philippines</h1>
+        <p class="hero-subtitle">
+          Tell us your region, budget, and what you want to do —
+          we'll match you with the right destinations across Luzon, Visayas, and Mindanao.
+        </p>
+        <a href="#discover" class="btn btn-primary" id="heroCta">Search destinations</a>
+      </div>
+      <div class="hero-meta">
+        <div class="meta-item">
+          <span class="meta-num">70+</span>
+          <span class="meta-label">Destinations</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-num">3</span>
+          <span class="meta-label">Island groups</span>
+        </div>
+        <div class="meta-item">
+          <span class="meta-num">4</span>
+          <span class="meta-label">Activity types</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Search Form ──────────────────────── -->
+  <section class="discover-section" id="discover">
+    <div class="container">
+      <h2 class="section-title">Find your destination</h2>
+      <p class="section-desc">Select your preferences — we'll match you with the right spots.</p>
+
+      <form id="preferenceForm" novalidate>
+
+        <!-- Region -->
+        <fieldset class="form-group" id="fg-region">
+          <legend class="form-label">
+            <span class="step-num">1</span>
+            <span class="label-icon" aria-hidden="true">📍</span>
+            Region
+          </legend>
+          <div class="option-grid cols-3" role="radiogroup" aria-label="Region" id="regionGrid">
+            <button type="button" class="option-card" data-field="region" data-value="Luzon" id="region-luzon" aria-pressed="false">
+              <span class="oc-icon" aria-hidden="true">🏔️</span>
+              <span class="oc-name">Luzon</span>
+              <span class="oc-desc">North & Central PH</span>
+            </button>
+            <button type="button" class="option-card" data-field="region" data-value="Visayas" id="region-visayas" aria-pressed="false">
+              <span class="oc-icon" aria-hidden="true">🌊</span>
+              <span class="oc-name">Visayas</span>
+              <span class="oc-desc">Central island group</span>
+            </button>
+            <button type="button" class="option-card" data-field="region" data-value="Mindanao" id="region-mindanao" aria-pressed="false">
+              <span class="oc-icon" aria-hidden="true">🌿</span>
+              <span class="oc-name">Mindanao</span>
+              <span class="oc-desc">Southern Philippines</span>
+            </button>
+          </div>
+        </fieldset>
+
+        <!-- Budget -->
+        <fieldset class="form-group" id="fg-budget">
+          <legend class="form-label">
+            <span class="step-num">2</span>
+            <span class="label-icon" aria-hidden="true">💸</span>
+            Budget
+          </legend>
+          <div class="option-grid cols-3" role="radiogroup" aria-label="Budget" id="budgetGrid">
+            <button type="button" class="option-card" data-field="budget" data-value="budget" id="budget-budget" aria-pressed="false">
+              <span class="oc-icon" aria-hidden="true">🎒</span>
+              <span class="oc-name">Budget</span>
+              <span class="oc-desc">₱500 – ₱2,000 / day</span>
+            </button>
+            <button type="button" class="option-card" data-field="budget" data-value="mid-range" id="budget-mid" aria-pressed="false">
+              <span class="oc-icon" aria-hidden="true">🏨</span>
+              <span class="oc-name">Mid-range</span>
+              <span class="oc-desc">₱2,000 – ₱6,000 / day</span>
+            </button>
+            <button type="button" class="option-card" data-field="budget" data-value="premium" id="budget-premium" aria-pressed="false">
+              <span class="oc-icon" aria-hidden="true">✨</span>
+              <span class="oc-name">Premium</span>
+              <span class="oc-desc">₱6,000+ / day</span>
+            </button>
+          </div>
+        </fieldset>
+
+        <!-- Activity -->
+        <fieldset class="form-group" id="fg-activity">
+          <legend class="form-label">
+            <span class="step-num">3</span>
+            <span class="label-icon" aria-hidden="true">🎯</span>
+            Activity
+          </legend>
+          <div class="option-grid cols-4" role="radiogroup" aria-label="Activity type" id="activityGrid">
+            <button type="button" class="option-card" data-field="activity" data-value="beach" id="activity-beach" aria-pressed="false">
+              <span class="oc-icon" aria-hidden="true">🏖️</span>
+              <span class="oc-name">Beach & Island</span>
+              <span class="oc-desc">Sun, sand & sea</span>
+            </button>
+            <button type="button" class="option-card" data-field="activity" data-value="hiking" id="activity-hiking" aria-pressed="false">
+              <span class="oc-icon" aria-hidden="true">🥾</span>
+              <span class="oc-name">Hiking & Nature</span>
+              <span class="oc-desc">Mountains & trails</span>
+            </button>
+            <button type="button" class="option-card" data-field="activity" data-value="city_tour" id="activity-city" aria-pressed="false">
+              <span class="oc-icon" aria-hidden="true">🏙️</span>
+              <span class="oc-name">City Tour</span>
+              <span class="oc-desc">Urban exploration</span>
+            </button>
+            <button type="button" class="option-card" data-field="activity" data-value="culture" id="activity-culture" aria-pressed="false">
+              <span class="oc-icon" aria-hidden="true">🏛️</span>
+              <span class="oc-name">Heritage & Culture</span>
+              <span class="oc-desc">History & traditions</span>
+            </button>
+          </div>
+        </fieldset>
+
+        <!-- HCI: Selection summary shows system status live -->
+        <div class="selection-summary" id="selectionSummary" aria-live="polite">
+          <span class="sum-item" id="sumRegion">📍 Region: <span class="sum-label">not set</span></span>
+          <span class="sum-sep">·</span>
+          <span class="sum-item" id="sumBudget">💸 Budget: <span class="sum-label">not set</span></span>
+          <span class="sum-sep">·</span>
+          <span class="sum-item" id="sumActivity">🎯 Activity: <span class="sum-label">not set</span></span>
+        </div>
+
+        <div id="formError" class="form-error" role="alert" aria-live="polite" style="display:none"></div>
+
+        <button type="submit" class="submit-btn" id="submitBtn" aria-label="Get personalized recommendations" disabled>
+          <span class="btn-label">Select region, budget &amp; activity to continue</span>
+          <span class="btn-icon" aria-hidden="true"></span>
+          <span class="btn-spinner" aria-hidden="true" style="display:none"></span>
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ── Results ──────────────────────────── -->
+  <section class="results-section" id="results-section" style="display:none" aria-live="polite">
+    <div class="container">
+      <div class="results-header">
+        <h2 id="resultsHeading">Recommended spots</h2>
+        <p id="resultsSubtitle" class="results-sub"></p>
+      </div>
+
+      <div class="pref-pills" id="prefPills" aria-label="Active filters"></div>
+
+      <div class="results-layout" id="resultsLayout">
+        <div class="results-cards-col">
+          <div id="resultsContainer" class="results-cards" aria-label="Recommended spots"></div>
+        </div>
+        <div class="map-col" id="map-section">
+          <div class="map-header">
+            <span class="map-title">Map</span>
+            <span class="map-hint">Click a card or pin to explore</span>
+          </div>
+          <div id="map" role="application" aria-label="Interactive map of recommended spots"></div>
+        </div>
+      </div>
+
+      <div id="noResults" class="no-results" style="display:none">
+        <span class="no-results-icon" aria-hidden="true">🔍</span>
+        <h3>No spots found</h3>
+        <p>Try a different region, budget, or activity combination.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ───────────────────────────── -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span aria-hidden="true">🗺️</span>
+        <span class="footer-name">TARA</span>
+        <span class="footer-tagline">Tourist Area Recommendation App</span>
+      </div>
+      <p class="footer-credits">
+        Coordinates from <strong>OpenStreetMap</strong> · Photos via <strong>Wikipedia Commons API</strong> · Built for Filipino travelers 🇵🇭
+      </p>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
