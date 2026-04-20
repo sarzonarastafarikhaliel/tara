@@ -82,12 +82,29 @@ def get_photo():
 
 @app.route('/wbs')
 def wbs():
-    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), 'wbs.html')
+    archive_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'archive')
+    return send_from_directory(archive_dir, 'wbs.html')
+
+
+@app.route('/fbs')
+def fbs():
+    archive_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'archive')
+    return send_from_directory(archive_dir, 'fbs.html')
 
 
 @app.route('/health')
 def health():
     return jsonify({'status': 'ok', 'app': 'TARA'})
+
+
+@app.route('/api-status')
+def api_status():
+    """Check data source status."""
+    return jsonify({
+        'status': 'ok',
+        'api': 'Wikipedia MediaWiki API',
+        'key_required': False,
+    })
 
 
 if __name__ == '__main__':

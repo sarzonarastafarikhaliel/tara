@@ -104,12 +104,12 @@ function updateSummary() {
   if (ready) {
     submitBtn.classList.add('ready');
     submitBtn.classList.remove('loading');
-    btnLabel.textContent = 'Get recommendations';
-    btnIcon.textContent = '→';
+    btnLabel.textContent = 'Search';
+    btnIcon.style.display = 'none';
   } else {
     submitBtn.classList.remove('ready');
-    btnLabel.textContent = 'Select region, budget & activity to continue';
-    btnIcon.textContent = '';
+    btnLabel.textContent = 'Search';
+    btnIcon.style.display = 'inline-block';
   }
 }
 
@@ -192,7 +192,6 @@ function renderResults() {
   scrollToResults();
 }
 
-// ── Build Spot Card ────────────────────────────────────────────────
 function buildCard(spot, idx) {
   const div = document.createElement('div');
   div.className = 'spot-card';
@@ -208,57 +207,41 @@ function buildCard(spot, idx) {
     ? spot.highlights.slice(0, 2).join(' · ')
     : '';
 
+  const photoHtml = spot.image_url
+    ? `<img class="card-img" src="${escHtml(spot.image_url)}" alt="${escHtml(spot.name)}" loading="lazy">`
+    : `<div class="card-img-placeholder">${emoji}</div>`;
+
   div.innerHTML = `
     <div class="card-img-wrap">
-      <div class="card-img-placeholder" id="placeholder-${spot.id}">${emoji}</div>
+      ${photoHtml}
     </div>
     <div class="card-body">
       <div class="card-row-top">
         <div class="card-name">${escHtml(spot.name)}</div>
-        ${score ? `<div class="match-badge">${score}</div>` : ''}
+        ${score ? `<div class="match-badge">★ ${score}</div>` : ''}
       </div>
-      <div class="card-location">📍 ${escHtml(location)}</div>
+      <div class="card-location">${escHtml(location)}</div>
       <div class="card-desc">${escHtml(spot.description)}</div>
       <div class="card-footer">
-        <div class="card-budget">💰 ${escHtml(spot.estimated_budget || '')}</div>
+        <div class="card-budget"><span style="font-weight: 600; color: var(--text);">${escHtml(spot.estimated_budget || 'Free')}</span></div>
         <div class="card-category">${activityLabel(spot.category)}</div>
       </div>
     </div>
     <div class="rank-badge" aria-label="Rank ${idx + 1}">${idx + 1}</div>
   `;
 
-  // Click: fly map to spot
-  div.addEventListener('click', () => activateCard(div, spot, idx));
-
-  // Lazy-load photo
-  loadPhoto(spot, div);
+  // Click: fly map to spot & open Google Search
+  div.addEventListener('click', () => {
+    activateCard(div, spot, idx);
+    const searchQuery = encodeURIComponent(`${spot.name} ${location} Philippines`);
+    const gSearchUrl = `https://www.google.com/search?q=${searchQuery}`;
+    window.open(gSearchUrl, '_blank');
+  });
 
   return div;
 }
 
-// ── Load Wikipedia Photo ───────────────────────────────────────────
-async function loadPhoto(spot, cardEl) {
-  if (!spot.wikimedia_title) return;
-  try {
-    const resp = await fetch(`/photo?title=${encodeURIComponent(spot.wikimedia_title)}`);
-    if (!resp.ok) return;
-    const data = await resp.json();
-    if (data.url) {
-      const wrap = cardEl.querySelector('.card-img-wrap');
-      const placeholder = wrap.querySelector('.card-img-placeholder');
-      const img = document.createElement('img');
-      img.className = 'card-img';
-      img.setAttribute('alt', spot.name);
-      img.setAttribute('loading', 'lazy');
-      img.onload = () => {
-        placeholder.style.display = 'none';
-        wrap.appendChild(img);
-      };
-      img.onerror = () => {};
-      img.src = data.url;
-    }
-  } catch (_) {}
-}
+// Deprecated: Photo loading is now synchronous with the API response
 
 // ── Activate Card (highlight + fly map) ───────────────────────────
 function activateCard(cardEl, spot, idx) {
@@ -284,7 +267,7 @@ function renderMap(spots) {
     });
 
     L.tileLayer(
-      'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+      'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
       {
         attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a> © <a href="https://carto.com">CARTO</a>',
         subdomains: 'abcd',
@@ -304,11 +287,21 @@ function renderMap(spots) {
     const score = spot.match_score != null ? Math.round(spot.match_score) : '';
     const location = [spot.municipality, spot.province].filter(Boolean).join(', ');
 
-    // Custom SVG icon
-    const icon = L.divIcon({
-      className: '',
-      html: `
-        <div style="
+    // Custom SVG icon with embedded photo if available
+    const markerHtml = spot.image_url
+      ? `<div style="
+          width:44px;height:44px;border-radius:50% 50% 50% 0;
+          background:${color};
+          border:2px solid #fff;
+          box-shadow:0 3px 12px rgba(0,0,0,0.4);
+          transform:rotate(-45deg);cursor:pointer;
+          overflow:hidden;position:relative;
+          transition:transform 0.2s;
+        ">
+          <img src="${escHtml(spot.image_url)}" style="width:100%;height:100%;object-fit:cover;transform:rotate(45deg) scale(1.4);" alt="">
+          <div style="position:absolute;inset:0;box-shadow:inset 0 0 0 1px rgba(0,0,0,0.1);border-radius:inherit;pointer-events:none;"></div>
+        </div>`
+      : `<div style="
           width:36px;height:36px;border-radius:50% 50% 50% 0;
           background:${color};
           border:2px solid rgba(255,255,255,0.2);
@@ -318,10 +311,14 @@ function renderMap(spots) {
           transition:transform 0.2s;
         ">
           <span style="transform:rotate(45deg)">${emoji}</span>
-        </div>`,
-      iconSize: [36, 36],
-      iconAnchor: [18, 36],
-      popupAnchor: [0, -38],
+        </div>`;
+
+    const icon = L.divIcon({
+      className: '',
+      html: markerHtml,
+      iconSize: spot.image_url ? [44, 44] : [36, 36],
+      iconAnchor: spot.image_url ? [22, 44] : [18, 36],
+      popupAnchor: spot.image_url ? [0, -46] : [0, -38],
     });
 
     const marker = L.marker([spot.lat, spot.lng], { icon })

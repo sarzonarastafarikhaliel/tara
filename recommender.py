@@ -1,7 +1,18 @@
+"""
+recommender.py – TF-IDF based travel spot recommender for TARA.
+
+Uses live Foursquare Places API data via api_client module.
+Two-stage pipeline:
+  1. Rule-based budget filtering
+  2. TF-IDF cosine-similarity ranking
+"""
+
 import numpy as np
+import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-from data_loader import load_spots
+
+from api_client import fetch_spots
 
 # Budget hierarchy for soft filtering
 BUDGET_RANK = {'budget': 0, 'mid-range': 1, 'premium': 2}
@@ -18,35 +29,52 @@ ACTIVITY_KEYWORDS = {
 def get_recommendations(region: str, budget: str, activity: str, top_n: int = 8) -> list:
     """
     Two-step recommendation:
-     1. Rule-based  – filter by exact region + activity match, soft budget cap
+     1. Rule-based  – fetch from Foursquare API by region + activity, soft budget cap
      2. Content-based – TF-IDF cosine similarity ranking of remaining spots
     """
-    df = load_spots()
+    # ── Step 0: Fetch spots from Foursquare API ───────────────────────
+    spots = fetch_spots(region=region, activity=activity)
 
-    # ── Step 1: Rule-based filtering ─────────────────────────────────────────
-    filtered = df[
-        (df['region'].str.lower() == region.lower()) &
-        (df['category'].str.lower() == activity.lower())
-    ].copy()
+    if not spots:
+        return []
 
+    df = pd.DataFrame(spots)
+
+    # Ensure required columns are strings
+    for col in ['region', 'category', 'budget_level', 'tags', 'description']:
+        if col in df.columns:
+            df[col] = df[col].fillna('').astype(str)
+
+    # Build a rich text corpus for TF-IDF (tags + description + name + location)
+    df['corpus'] = (
+        df['tags'].fillna('') + ' ' +
+        df['description'].fillna('') + ' ' +
+        df['name'].fillna('') + ' ' +
+        df['province'].fillna('') + ' ' +
+        df['municipality'].fillna('')
+    )
+
+    # ── Step 1: Rule-based budget filtering ───────────────────────────
     user_budget_rank = BUDGET_RANK.get(budget.lower(), 1)
 
     # Soft budget filter: show spots at or below the user's level
-    budget_filtered = filtered[
-        filtered['budget_level'].apply(
+    budget_filtered = df[
+        df['budget_level'].apply(
             lambda b: BUDGET_RANK.get(b.lower(), 1) <= user_budget_rank
         )
     ]
 
-    # Fall back to full activity-region set if budget filter leaves < 3 results
+    # Fall back to full set if budget filter leaves < 3 results
     if len(budget_filtered) >= 3:
-        filtered = budget_filtered
+        filtered = budget_filtered.copy()
+    else:
+        filtered = df.copy()
     # else: keep all matched region+activity spots (budget relaxed)
 
     if filtered.empty:
         return []
 
-    # ── Step 2: TF-IDF cosine similarity ranking ──────────────────────────────
+    # ── Step 2: TF-IDF cosine similarity ranking ──────────────────────
     activity_boost = ACTIVITY_KEYWORDS.get(activity.lower(), '')
     user_query = f"{region} {activity} {budget} Philippines travel tourism {activity_boost}"
 
@@ -81,7 +109,7 @@ def get_recommendations(region: str, budget: str, activity: str, top_n: int = 8)
     cols = [
         'id', 'name', 'region', 'province', 'municipality', 'category',
         'budget_level', 'description', 'estimated_budget',
-        'lat', 'lng', 'wikimedia_title', 'highlights', 'match_score'
+        'lat', 'lng', 'wikimedia_title', 'image_url', 'highlights', 'match_score'
     ]
     cols = [c for c in cols if c in result.columns]
     return result[cols].to_dict('records')

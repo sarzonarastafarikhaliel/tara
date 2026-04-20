@@ -35,142 +35,76 @@
     </div>
   </nav>
 
-  <!-- ── Hero ────────────────────────────── -->
+  <!-- ── Hero & Search Form ──────────────────────── -->
   <section class="hero" id="hero">
+    <div class="hero-bg">
+      <img src="/static/images/hero.png" alt="Philippine beach" class="hero-img" />
+      <div class="hero-overlay"></div>
+    </div>
     <div class="container hero-inner">
       <div class="hero-text">
-        <h1 class="hero-title">Discover the best of the Philippines</h1>
-        <p class="hero-subtitle">
-          Tell us your region, budget, and what you want to do —
-          we'll match you with the right destinations across Luzon, Visayas, and Mindanao.
-        </p>
-        <a href="#discover" class="btn btn-primary" id="heroCta">Search destinations</a>
+        <h1 class="hero-title">Tara! Your next adventure awaits.</h1>
       </div>
-      <div class="hero-meta">
-        <div class="meta-item">
-          <span class="meta-num">70+</span>
-          <span class="meta-label">Destinations</span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-num">3</span>
-          <span class="meta-label">Island groups</span>
-        </div>
-        <div class="meta-item">
-          <span class="meta-num">4</span>
-          <span class="meta-label">Activity types</span>
-        </div>
+      
+      <!-- Interactive Booking Widget -->
+      <div class="search-widget-wrapper">
+        <form id="preferenceForm" class="search-widget" novalidate>
+          <div class="widget-row">
+            
+            <!-- Region -->
+            <fieldset class="widget-group" id="fg-region">
+              <legend class="widget-label">Where</legend>
+              <div class="widget-options" role="radiogroup" aria-label="Region" id="regionGrid">
+                <button type="button" class="option-card" data-field="region" data-value="Luzon" id="region-luzon" aria-pressed="false">Luzon</button>
+                <button type="button" class="option-card" data-field="region" data-value="Visayas" id="region-visayas" aria-pressed="false">Visayas</button>
+                <button type="button" class="option-card" data-field="region" data-value="Mindanao" id="region-mindanao" aria-pressed="false">Mindanao</button>
+              </div>
+            </fieldset>
+
+            <div class="widget-divider"></div>
+
+            <!-- Budget -->
+            <fieldset class="widget-group" id="fg-budget">
+              <legend class="widget-label">Budget</legend>
+              <div class="widget-options" role="radiogroup" aria-label="Budget" id="budgetGrid">
+                <button type="button" class="option-card" data-field="budget" data-value="budget" id="budget-budget" aria-pressed="false">Backpacker</button>
+                <button type="button" class="option-card" data-field="budget" data-value="mid-range" id="budget-mid" aria-pressed="false">Mid-range</button>
+                <button type="button" class="option-card" data-field="budget" data-value="premium" id="budget-premium" aria-pressed="false">Premium</button>
+              </div>
+            </fieldset>
+
+            <div class="widget-divider"></div>
+
+            <!-- Activity -->
+            <fieldset class="widget-group" id="fg-activity">
+              <legend class="widget-label">Activity</legend>
+              <div class="widget-options" role="radiogroup" aria-label="Activity type" id="activityGrid">
+                <button type="button" class="option-card" data-field="activity" data-value="beach" id="activity-beach" aria-pressed="false">Beach</button>
+                <button type="button" class="option-card" data-field="activity" data-value="hiking" id="activity-hiking" aria-pressed="false">Nature</button>
+                <button type="button" class="option-card" data-field="activity" data-value="city_tour" id="activity-city" aria-pressed="false">City</button>
+                <button type="button" class="option-card" data-field="activity" data-value="culture" id="activity-culture" aria-pressed="false">Culture</button>
+              </div>
+            </fieldset>
+            
+            <div class="widget-action">
+              <button type="submit" class="submit-btn" id="submitBtn" aria-label="Search" disabled>
+                <span class="btn-icon" aria-hidden="true">🔍</span>
+                <span class="btn-label">Search</span>
+                <span class="btn-spinner" aria-hidden="true" style="display:none"></span>
+              </button>
+            </div>
+          </div>
+          
+          <div id="formError" class="form-error" role="alert" aria-live="polite" style="display:none"></div>
+        </form>
       </div>
-    </div>
-  </section>
-
-  <!-- ── Search Form ──────────────────────── -->
-  <section class="discover-section" id="discover">
-    <div class="container">
-      <h2 class="section-title">Find your destination</h2>
-      <p class="section-desc">Select your preferences — we'll match you with the right spots.</p>
-
-      <form id="preferenceForm" novalidate>
-
-        <!-- Region -->
-        <fieldset class="form-group" id="fg-region">
-          <legend class="form-label">
-            <span class="step-num">1</span>
-            <span class="label-icon" aria-hidden="true">📍</span>
-            Region
-          </legend>
-          <div class="option-grid cols-3" role="radiogroup" aria-label="Region" id="regionGrid">
-            <button type="button" class="option-card" data-field="region" data-value="Luzon" id="region-luzon" aria-pressed="false">
-              <span class="oc-icon" aria-hidden="true">🏔️</span>
-              <span class="oc-name">Luzon</span>
-              <span class="oc-desc">North & Central PH</span>
-            </button>
-            <button type="button" class="option-card" data-field="region" data-value="Visayas" id="region-visayas" aria-pressed="false">
-              <span class="oc-icon" aria-hidden="true">🌊</span>
-              <span class="oc-name">Visayas</span>
-              <span class="oc-desc">Central island group</span>
-            </button>
-            <button type="button" class="option-card" data-field="region" data-value="Mindanao" id="region-mindanao" aria-pressed="false">
-              <span class="oc-icon" aria-hidden="true">🌿</span>
-              <span class="oc-name">Mindanao</span>
-              <span class="oc-desc">Southern Philippines</span>
-            </button>
-          </div>
-        </fieldset>
-
-        <!-- Budget -->
-        <fieldset class="form-group" id="fg-budget">
-          <legend class="form-label">
-            <span class="step-num">2</span>
-            <span class="label-icon" aria-hidden="true">💸</span>
-            Budget
-          </legend>
-          <div class="option-grid cols-3" role="radiogroup" aria-label="Budget" id="budgetGrid">
-            <button type="button" class="option-card" data-field="budget" data-value="budget" id="budget-budget" aria-pressed="false">
-              <span class="oc-icon" aria-hidden="true">🎒</span>
-              <span class="oc-name">Budget</span>
-              <span class="oc-desc">₱500 – ₱2,000 / day</span>
-            </button>
-            <button type="button" class="option-card" data-field="budget" data-value="mid-range" id="budget-mid" aria-pressed="false">
-              <span class="oc-icon" aria-hidden="true">🏨</span>
-              <span class="oc-name">Mid-range</span>
-              <span class="oc-desc">₱2,000 – ₱6,000 / day</span>
-            </button>
-            <button type="button" class="option-card" data-field="budget" data-value="premium" id="budget-premium" aria-pressed="false">
-              <span class="oc-icon" aria-hidden="true">✨</span>
-              <span class="oc-name">Premium</span>
-              <span class="oc-desc">₱6,000+ / day</span>
-            </button>
-          </div>
-        </fieldset>
-
-        <!-- Activity -->
-        <fieldset class="form-group" id="fg-activity">
-          <legend class="form-label">
-            <span class="step-num">3</span>
-            <span class="label-icon" aria-hidden="true">🎯</span>
-            Activity
-          </legend>
-          <div class="option-grid cols-4" role="radiogroup" aria-label="Activity type" id="activityGrid">
-            <button type="button" class="option-card" data-field="activity" data-value="beach" id="activity-beach" aria-pressed="false">
-              <span class="oc-icon" aria-hidden="true">🏖️</span>
-              <span class="oc-name">Beach & Island</span>
-              <span class="oc-desc">Sun, sand & sea</span>
-            </button>
-            <button type="button" class="option-card" data-field="activity" data-value="hiking" id="activity-hiking" aria-pressed="false">
-              <span class="oc-icon" aria-hidden="true">🥾</span>
-              <span class="oc-name">Hiking & Nature</span>
-              <span class="oc-desc">Mountains & trails</span>
-            </button>
-            <button type="button" class="option-card" data-field="activity" data-value="city_tour" id="activity-city" aria-pressed="false">
-              <span class="oc-icon" aria-hidden="true">🏙️</span>
-              <span class="oc-name">City Tour</span>
-              <span class="oc-desc">Urban exploration</span>
-            </button>
-            <button type="button" class="option-card" data-field="activity" data-value="culture" id="activity-culture" aria-pressed="false">
-              <span class="oc-icon" aria-hidden="true">🏛️</span>
-              <span class="oc-name">Heritage & Culture</span>
-              <span class="oc-desc">History & traditions</span>
-            </button>
-          </div>
-        </fieldset>
-
-        <!-- HCI: Selection summary shows system status live -->
-        <div class="selection-summary" id="selectionSummary" aria-live="polite">
-          <span class="sum-item" id="sumRegion">📍 Region: <span class="sum-label">not set</span></span>
-          <span class="sum-sep">·</span>
-          <span class="sum-item" id="sumBudget">💸 Budget: <span class="sum-label">not set</span></span>
-          <span class="sum-sep">·</span>
-          <span class="sum-item" id="sumActivity">🎯 Activity: <span class="sum-label">not set</span></span>
-        </div>
-
-        <div id="formError" class="form-error" role="alert" aria-live="polite" style="display:none"></div>
-
-        <button type="submit" class="submit-btn" id="submitBtn" aria-label="Get personalized recommendations" disabled>
-          <span class="btn-label">Select region, budget &amp; activity to continue</span>
-          <span class="btn-icon" aria-hidden="true"></span>
-          <span class="btn-spinner" aria-hidden="true" style="display:none"></span>
-        </button>
-      </form>
+      
+      <!-- Hidden summary for JS functionality -->
+      <div class="selection-summary visually-hidden" id="selectionSummary" aria-live="polite" style="display:none">
+        <span id="sumRegion">Region: <span class="sum-label">not set</span></span>
+        <span id="sumBudget">Budget: <span class="sum-label">not set</span></span>
+        <span id="sumActivity">Activity: <span class="sum-label">not set</span></span>
+      </div>
     </div>
   </section>
 
@@ -214,7 +148,7 @@
         <span class="footer-tagline">Tourist Area Recommendation App</span>
       </div>
       <p class="footer-credits">
-        Coordinates from <strong>OpenStreetMap</strong> · Photos via <strong>Wikipedia Commons API</strong> · Built for Filipino travelers 🇵🇭
+        Spots via <strong>Foursquare Places API</strong> · Photos via <strong>Wikipedia Commons API</strong> · Maps by <strong>OpenStreetMap</strong> · Built for Filipino travelers 🇵🇭
       </p>
     </div>
   </footer>

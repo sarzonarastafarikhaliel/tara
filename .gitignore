@@ -7,3 +7,4 @@ venv/
 *.egg-info/
 dist/
 .azure-config
+archive/
